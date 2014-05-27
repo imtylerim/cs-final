@@ -1,10 +1,16 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
+>>>>>>> parent of 91d1758... Update GameComp
 package game2014;
+>>>>>>> 01560a47f9331930dd63846aced1babed4dc48e4
 
 import java.awt.Color;
 import java.awt.Font;
