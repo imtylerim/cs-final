@@ -1,0 +1,126 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package game2014;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author jgonzalez
+ */
+public class GameComp extends GameDriver {
+    Rectangle background = new Rectangle(0,0, 800, 600);
+    int bgPos = 0;
+    BufferedImage[] wallet = new BufferedImage[10];
+    ArrayList<Projectile>  pouch = new ArrayList<Projectile>();
+    ArrayList<Monster> beckman = new ArrayList<Monster>();
+    BufferedImage manRight = this.addImage("src\\game2014\\manRight.png");
+    BufferedImage bullet = this.addImage("src\\game2014\\bullet.png");
+    BufferedImage bgImage = this.addImage("src\\game2014\\background.jpg"); 
+    int spawnDelay = 100;
+    int spawnTimer = spawnDelay;
+    Hero hamza = new Hero();
+    int gameState = 1;
+    int gameScore = 0;
+    Font gameFont = new Font(Font.SERIF, Font.ITALIC, 100);
+    Coin cent;
+    public GameComp() {
+        loadImages();
+    }
+    public void loadImages() {
+        // for rotating coin
+        BufferedImage coinSheet = this.addImage("src\\game2014\\coinSheet.png");
+        for(int i = 0; i < wallet.length; i++) {
+            wallet[i] = coinSheet.getSubimage(44*i, 0, 44, 40);
+        }
+        cent = new Coin(wallet);
+    }
+    
+    public void draw(Graphics2D win) {
+       // display background
+        win.setColor(Color.WHITE);
+        win.fill(background);
+        this.drawBackGround(win);
+        if (gameState == 1) {
+        
+           gamePlay(win);
+        } else {
+            gameOver(win);
+        }   
+    }
+    public void drawBackGround(Graphics2D win) {
+        
+        if (bgPos < -bgImage.getWidth())
+            bgPos = 0;
+        win.drawImage(bgImage, null, bgPos, 0);
+        win.drawImage(bgImage, null, bgPos + bgImage.getWidth(), 0);
+        bgPos -= 1;
+    }
+    
+    public void gamePlay(Graphics2D win) {
+            gameScore++;
+            collision();
+
+            // display hero
+            win.setColor(Color.MAGENTA);
+            // spawn the monster
+            spawnTimer++;
+            if (spawnTimer > spawnDelay) {
+             spawnTimer = 0;
+             beckman.add(new Monster(wallet));   
+            }
+            hamza.action(keys, pouch);
+            cent.moveAndDraw(win);
+            hamza.moveAndDraw(win, manRight);
+            for(Element p : pouch) {
+                p.moveAndDraw(win, bullet);
+            }
+            win.setColor(Color.RED);
+            for(Element m : beckman) {
+                m.moveAndDraw(win);
+            }
+            //win.drawString("Score " + , TOP_ALIGNMENT, TOP_ALIGNMENT);
+    }
+    public void gameOver(Graphics2D win) {
+            win.setColor(Color.RED);
+            win.setFont(gameFont);
+            win.drawString("Game Over", 100, 100);
+        
+    }
+    public void collision() {
+        // bullet - monster collision
+        for(int i = 0; i < beckman.size(); i++) {
+            Element iMonster = beckman.get(i);
+            if (hamza.intersects(iMonster)) {
+                // game over
+                gameState = 2;  
+            }
+            for(int j = 0; j < pouch.size(); j++) {
+                Element iPro = pouch.get(j);
+                if(iMonster.intersects(iPro)) {
+                    pouch.remove(j);
+                    beckman.remove(i);
+                    j = pouch.size();
+                    i--;
+                    gameScore += 10; 
+                } else if(iPro.getX() > 800) {
+                    pouch.remove(j);
+                } else if (iMonster.getX() < -100) {
+                    beckman.remove(i);
+                    j = pouch.size();
+                    i--;
+            } 
+            }
+        }
+    }
+    
+}
